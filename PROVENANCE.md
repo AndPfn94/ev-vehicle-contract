@@ -34,6 +34,21 @@ is not asserted merely because they are included in this package.
 | tests/test_integration.py | AI-assisted integrated schema and configuration tests |
 | tests/test_socket.py | AI-assisted socket service and Client test fixtures |
 
+Package 1.1.0-rc.1 modifies the specification, release metadata,
+configuration validator and integrated tests from the 1.0.0-rc.2 baseline
+(`bff1c2a8417656349387128d1cc7e8a1e30b5dce`). These changes were developed
+with AI assistance under human direction. The original attribution and
+license notices are retained. Added material has the following origins.
+
+| File | Recorded origin |
+| --- | --- |
+| provider-config.schema.json | AI-assisted extension of the baseline configuration definition |
+| provider-cost-policy.md | AI-assisted specification of minimum Provider behavior |
+| examples/config-paid.json | AI-assisted synthetic example derived from the baseline configuration |
+| examples/config-paid.yaml | AI-assisted YAML equivalent of the synthetic example |
+| examples/provider-paid.json | AI-assisted synthetic metadata derived from the baseline example |
+| tests/test_cost_configuration.py | AI-assisted independent configuration tests |
+
 The official license text was obtained from
 https://www.apache.org/licenses/LICENSE-2.0.txt. Its SHA-256 is
 cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30.

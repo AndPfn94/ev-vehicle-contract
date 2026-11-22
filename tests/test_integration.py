@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Modified for provider configuration 1.1 in package 1.1.0-rc.1.
 """Integrated, offline schema and configuration checks."""
 import copy
 import unittest
@@ -14,7 +15,8 @@ class IntegrationTests(unittest.TestCase):
     def setUp(self):
         self.schemas = {
             name: load(name)
-            for name in ("vehicle-data.schema.json", "provider.schema.json")
+            for name in ("vehicle-data.schema.json", "provider.schema.json",
+                         "provider-config.schema.json")
         }
         self.registry = Registry().with_resources(
             (schema["$id"], Resource.from_contents(schema))
@@ -26,6 +28,7 @@ class IntegrationTests(unittest.TestCase):
             ("vehicle-data.schema.json", "request", "request"),
             ("provider.schema.json", "provider", "provider"),
             ("provider.schema.json", "config", "config"),
+            ("provider-config.schema.json", "config", "config-paid"),
         ]
         for schema_file, definition, example in cases:
             reference = self.schemas[schema_file]["$id"] + "#/$defs/" + definition
@@ -51,15 +54,18 @@ class IntegrationTests(unittest.TestCase):
                     pending.extend(node)
 
     def test_all_example_documents_validate_at_schema_root(self):
+        configuration_examples = {
+            "provider": "provider.schema.json",
+            "provider-paid": "provider.schema.json",
+            "config": "provider.schema.json",
+            "config-paid": "provider-config.schema.json",
+        }
         for path in (ROOT / "examples").glob("*.json"):
-            schema_file = (
-                "provider.schema.json"
-                if path.stem in ("provider", "config")
-                else "vehicle-data.schema.json"
-            )
-            Draft202012Validator(
-                self.schemas[schema_file], format_checker=FORMATS
-            ).validate(load("examples/" + path.name))
+            with self.subTest(example=path.name):
+                schema_file = configuration_examples.get(path.stem, "vehicle-data.schema.json")
+                Draft202012Validator(
+                    self.schemas[schema_file], format_checker=FORMATS
+                ).validate(load("examples/" + path.name))
 
     def test_yaml_and_json_configuration_are_identical(self):
         text = (ROOT / "examples/config.yaml").read_text(encoding="utf-8")
@@ -79,7 +85,7 @@ class IntegrationTests(unittest.TestCase):
             check_configuration(load("examples/config.json"), [provider])
 
     def test_version_and_license_artifacts(self):
-        self.assertEqual((ROOT / "VERSION").read_text().strip(), "1.0.0-rc.2")
+        self.assertEqual((ROOT / "VERSION").read_text().strip(), "1.1.0-rc.1")
         self.assertIn("Apache License", (ROOT / "LICENSE").read_text())
         self.assertIn("Publisher: AndPfn94", (ROOT / "NOTICE").read_text())
         self.assertNotIn("Copyright 2026", (ROOT / "NOTICE").read_text())

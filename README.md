@@ -1,7 +1,9 @@
 # Vehicle Data Contract
 
-Release candidate **1.0.0-rc.2**, contract **1.0**.
+Release candidate **1.1.0-rc.1**, telemetry protocol **1.0**.
 Publisher **AndPfn94**. SPDX-License-Identifier **Apache-2.0**.
+
+This candidate extends the provider configuration from **1.0.0-rc.2**.
 
 This independent contract defines how read-only vehicle data is supplied.
 A Provider obtains source data. A Vehicle Data Service maintains a normalized
@@ -35,14 +37,16 @@ Apply the semantic requirements below in addition to schema validation.
 | --- | --- |
 | vehicle-data.schema.json | https://github.com/AndPfn94/ev-vehicle-contract/schemas/1.0/vehicle-data.schema.json |
 | provider.schema.json | https://github.com/AndPfn94/ev-vehicle-contract/schemas/1.0/provider.schema.json |
+| provider-config.schema.json | https://github.com/AndPfn94/ev-vehicle-contract/schemas/1.1/provider-config.schema.json |
 
 These versioned HTTPS identifiers name schema resources. Validators resolve
 them through a local registry containing the supplied files. Validation
 operates offline. Arbitrary external schema retrieval is excluded.
 
 The telemetry schema defines sample, estimate, entry, request and response.
-The metadata schema defines provider and config. The schema roots also
-validate the corresponding complete documents.
+The metadata schema defines provider metadata and legacy configuration 1.0.
+The new configuration schema defines configuration 1.1. Each schema root
+also validates the corresponding complete documents.
 
 ## Actual measurements and units
 
@@ -156,7 +160,8 @@ the local mode, site power management and device protection.
 
 ## Provider metadata and configuration
 
-provider.schema.json defines Provider metadata and configuration version 1.0.
+provider.schema.json defines Provider metadata and legacy configuration 1.0.
+provider-config.schema.json defines the optional configuration version 1.1.
 Metadata is versioned data supplied by an implementation. source_kind is
 manufacturer for a direct manufacturer source or integration for a general
 intermediary or adapter. These categories prescribe no particular software
@@ -188,15 +193,40 @@ configuration or metadata. Secret fields have no default.
 ## Cost and query controls
 
 poll_interval_s is at least the Provider's minimum interval. Use cache-first
-access, account-wide single flight, authorization checks and bounded backoff.
-Respect quotas, vehicle sleep and Retry-After. User-interface reads never
-initiate source queries or implicit wake-ups.
+access, account-wide single flight, authorization checks and bounded
+backoff. Respect quotas, vehicle sleep and Retry-After. Only independent
+Provider acquisition may initiate a source query. Consumer and snapshot
+reads MUST be served from the cache and MUST NOT schedule or trigger a source
+query, credential refresh or wake-up.
 
-Version 1.0 fixes allow_paid_requests=false. With cost_class paid or unknown,
-only existing free cache or push data is usable. Block queries whose price
-is unknown. Paid queries require a separately specified extension, explicit
-account-owner consent and a durable monthly budget safe across concurrency
-and restarts. Provider metadata cannot grant that consent.
+Configuration 1.0 still requires allow_paid_requests=false. Configuration
+1.1 treats an omitted allow_paid_requests exactly like false. Under either
+version, without a paid opt-in, a Provider classified paid or unknown can
+supply only existing authorized cache or no-additional-cost push data.
+Unknown or stale pricing MUST block new potentially chargeable operations,
+including operations advertised as free when current zero cost is unverified.
+
+To request paid acquisition, an enabled source in configuration 1.1 needs
+allow_paid_requests=true and cost_policy_ref, an opaque alias in the
+service's private cost policy store. The selected Provider metadata must
+have cost_class=paid, which includes APIs with a mix of free and billable
+operations. A disabled source cannot acquire data. The service MUST read
+the opt-in and policy reference from the source's configuration fields.
+Provider settings and metadata cannot substitute for these fields.
+Successful validation establishes configuration compatibility only.
+
+Before each potentially billable attempt the Provider or Vehicle Data
+Service MUST enforce its own [cost policy](provider-cost-policy.md).
+This requires an applicable, explicit authorization from the API account
+holder, a durable budget for estimated costs, a current applicable price
+basis for the operation and an atomic reservation. Block the attempt if
+any prerequisite is missing, invalid or cannot be verified. Manufacturer
+registration, tariffs, authorization records and enforcement are service
+responsibilities. They stay outside the public configuration and socket
+payloads. The existing cost_blocked status can report a blocked source.
+The software budget bounds estimates under its pricing assumptions.
+Third-party invoices and the continuation of free allowances are outside
+that guarantee.
 
 ## Security and deployment
 
@@ -226,12 +256,24 @@ configuration and measurement on the target system.
 
 ## Versioning and verification
 
-VERSION identifies package 1.0.0-rc.2. contract_version and schema_version
-remain 1.0. Mandatory telemetry fields, units, quality semantics, version
-recognition and control authority require a new major version when changed.
+VERSION identifies package 1.1.0-rc.1. Wire and configuration
+contract_version remain 1.0, as does the Provider metadata schema_version.
+Only configurations opting into the new schema use schema_version=1.1.
+Existing configuration 1.0 and snapshot clients require no migration.
+Configuration tools that choose to support 1.1 must resolve its distinct
+schema identifier locally, preserve the exact schema version on writes and
+validate the Provider metadata separately. A 1.0-only tool rejects 1.1.
+Defaults, upgrades and metadata MUST NOT introduce an opt-in automatically.
+Never rewrite a 1.1 opt-in as a 1.0 configuration. See
+[the paid JSON example](examples/config-paid.json) and its
+[YAML equivalent](examples/config-paid.yaml). They use synthetic metadata
+and refer to a hypothetical service-local policy.
+
+Mandatory telemetry fields, units, quality semantics, version recognition
+and control authority require a new major version when changed.
 Additional wire fields require explicit negotiation, since version 1.0 rejects
 unknown fields. Editorial corrections use package patch revisions.
-A final v1.0.0 tag requires separate technical and domain approval.
+A final tag requires separate technical and domain approval.
 
 Install test requirements and run from the package root.
 
@@ -245,6 +287,10 @@ Independent tests cover schemas, configuration, examples, semantics and
 actual local Unix socket exchanges with separate service and Client fixtures.
 Synthetic fixtures do not qualify production identity enforcement, source
 authenticity, hardware behavior, service isolation or resource limits.
+Use `conformance.check_configuration(config, providers)` to check the
+canonical JSON data model and its version-matched Provider metadata. It
+checks configuration structure and compatibility. A Provider tests the
+private policy and its enforcement in its own service.
 
 See [CHANGELOG.md](CHANGELOG.md) and
 [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema).

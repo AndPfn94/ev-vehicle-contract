@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AndPfn94/ev-vehicle-contract/schemas/1.1/provider-config.schema.json",
+  "$comment": "Configuration derived from the Vehicle Data Contract 1.0.0-rc.2 config definition with an optional paid-request gate.",
+  "title": "Vehicle provider configuration 1.1",
+  "$ref": "#/$defs/config",
+  "$defs": {
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.1"
+        },
+        "contract_version": {
+          "const": "1.0"
+        },
+        "socket_path": {
+          "type": "string",
+          "pattern": "^/run/[A-Za-z0-9_./-]+\\.sock$",
+          "maxLength": 100
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+              },
+              "provider_version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "vehicles": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 12,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+                }
+              },
+              "poll_interval_s": {
+                "type": "integer",
+                "minimum": 60
+              },
+              "allow_paid_requests": {
+                "type": "boolean",
+                "default": false
+              },
+              "cost_policy_ref": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+                "not": {
+                  "pattern": "\\s"
+                }
+              },
+              "settings": {
+                "type": "object",
+                "maxProperties": 32,
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "provider_id",
+              "provider_version",
+              "enabled",
+              "vehicles",
+              "poll_interval_s",
+              "settings"
+            ],
+            "if": {
+              "required": [
+                "allow_paid_requests"
+              ],
+              "properties": {
+                "allow_paid_requests": {
+                  "const": true
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "cost_policy_ref"
+              ]
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "cost_policy_ref"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "contract_version",
+        "socket_path",
+        "sources"
+      ]
+    }
+  }
+}

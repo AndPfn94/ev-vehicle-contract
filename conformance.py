@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
+# Modified for provider configuration 1.1 in package 1.1.0-rc.1.
 """Portable Vehicle Data Contract checks. Requires jsonschema>=4.18,<5."""
 import argparse
 import json
@@ -107,7 +108,10 @@ def check_response(response, request):
 
 
 def check_configuration(config, providers):
-    validate(config, "config", "provider.schema.json")
+    schema_file = "provider.schema.json"
+    if isinstance(config, dict) and config.get("schema_version") == "1.1":
+        schema_file = "provider-config.schema.json"
+    validate(config, "config", schema_file)
     indexed = {}
     for provider in providers:
         validate(provider, "provider", "provider.schema.json")
@@ -124,6 +128,8 @@ def check_configuration(config, providers):
         if len(vehicles) > 12:
             raise ValueError("vehicle limit")
         provider = indexed[(source["provider_id"], source["provider_version"])]
+        if source.get("allow_paid_requests", False) and provider["cost_class"] != "paid":
+            raise ValueError("paid requests require a provider with cost_class paid")
         if source["poll_interval_s"] < provider["minimum_poll_interval_s"]:
             raise ValueError("provider cooldown")
         fields = {field["key"]: field for field in provider["fields"]}
