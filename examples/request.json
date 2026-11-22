@@ -1,0 +1,8 @@
+{
+  "contract_version": "1.0",
+  "request_id": "read-1",
+  "operation": "snapshot",
+  "vehicles": [
+    "car-a"
+  ]
+}

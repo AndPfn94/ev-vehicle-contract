@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AndPfn94/ev-vehicle-contract/schemas/1.0/provider.schema.json",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/provider"
+    },
+    {
+      "$ref": "#/$defs/config"
+    }
+  ],
+  "$defs": {
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "provider_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "provider_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "documentation_url": {
+          "type": "string",
+          "pattern": "^https://[^\\s]+$",
+          "maxLength": 500
+        },
+        "source_kind": {
+          "enum": [
+            "manufacturer",
+            "integration"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,47}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80
+              },
+              "kind": {
+                "enum": [
+                  "text",
+                  "integer",
+                  "number",
+                  "boolean",
+                  "select",
+                  "secret_ref"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "help": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "documentation_url": {
+                "type": "string",
+                "pattern": "^https://[^\\s]+$",
+                "maxLength": 500
+              },
+              "choices": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 32,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              },
+              "minimum": {
+                "type": "number"
+              },
+              "maximum": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "key",
+              "label",
+              "kind",
+              "required",
+              "help"
+            ]
+          }
+        },
+        "minimum_poll_interval_s": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "cost_class": {
+          "enum": [
+            "free",
+            "paid",
+            "unknown"
+          ]
+        },
+        "telemetry_only": {
+          "const": true
+        },
+        "credential_owner": {
+          "const": "external_service"
+        }
+      },
+      "required": [
+        "schema_version",
+        "provider_id",
+        "provider_version",
+        "label",
+        "documentation_url",
+        "source_kind",
+        "fields",
+        "minimum_poll_interval_s",
+        "cost_class",
+        "telemetry_only",
+        "credential_owner"
+      ]
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "contract_version": {
+          "const": "1.0"
+        },
+        "socket_path": {
+          "type": "string",
+          "pattern": "^/run/[A-Za-z0-9_./-]+\\.sock$",
+          "maxLength": 100
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+              },
+              "provider_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+              },
+              "provider_version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24
+              },
+              "enabled": {
+                "type": "boolean"
+              },
+              "vehicles": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 12,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+                }
+              },
+              "poll_interval_s": {
+                "type": "integer",
+                "minimum": 60
+              },
+              "allow_paid_requests": {
+                "const": false
+              },
+              "settings": {
+                "type": "object",
+                "maxProperties": 32,
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "number",
+                    "boolean"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "provider_id",
+              "provider_version",
+              "enabled",
+              "vehicles",
+              "poll_interval_s",
+              "allow_paid_requests",
+              "settings"
+            ]
+          }
+        }
+      },
+      "required": [
+        "schema_version",
+        "contract_version",
+        "socket_path",
+        "sources"
+      ]
+    }
+  },
+  "title": "Vehicle provider metadata and configuration 1.0"
+}

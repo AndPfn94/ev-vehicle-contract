@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "provider_id": "example",
+  "provider_version": "1.0.0",
+  "label": "Beispielanbieter",
+  "documentation_url": "https://example.org/vehicle",
+  "source_kind": "manufacturer",
+  "fields": [
+    {
+      "key": "account",
+      "label": "Kontoalias",
+      "kind": "text",
+      "required": true,
+      "help": "Lokaler Alias ohne persönliche Kennung."
+    },
+    {
+      "key": "credential",
+      "label": "Gespeicherter Zugang",
+      "kind": "secret_ref",
+      "required": true,
+      "help": "Referenz im privaten Speicher des Fahrzeugdienstes."
+    }
+  ],
+  "minimum_poll_interval_s": 120,
+  "cost_class": "unknown",
+  "telemetry_only": true,
+  "credential_owner": "external_service"
+}

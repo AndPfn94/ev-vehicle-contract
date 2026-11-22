@@ -1,0 +1,19 @@
+{
+  "contract_version": "1.0",
+  "request_id": "read-1",
+  "generated_at": "2026-11-22T10:00:02Z",
+  "vehicles": [
+    {
+      "vehicle": "car-a",
+      "received_at": null,
+      "status": "source_time_unknown",
+      "retry_after_s": null,
+      "sample": null,
+      "estimate": {
+        "soc": 0.71,
+        "calculated_at": "2026-11-22T10:00:00Z",
+        "method": "source_estimate"
+      }
+    }
+  ]
+}

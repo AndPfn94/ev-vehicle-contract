@@ -1,0 +1,43 @@
+{
+  "contract_version": "1.0",
+  "request_id": "read-1",
+  "generated_at": "2026-11-22T10:00:02Z",
+  "vehicles": [
+    {
+      "vehicle": "car-a",
+      "received_at": "2026-11-22T10:00:01Z",
+      "status": "ok",
+      "retry_after_s": null,
+      "sample": {
+        "version": 1,
+        "vehicle": "car-a",
+        "measured_at": "2026-11-22T10:00:00Z",
+        "quality": "valid",
+        "soc": 0.64,
+        "charge_limit": 0.8,
+        "plugged_in": true,
+        "charging_state": "charging",
+        "moving": false
+      },
+      "estimate": null
+    },
+    {
+      "vehicle": "car-b",
+      "received_at": "2026-11-22T10:00:01Z",
+      "status": "ok",
+      "retry_after_s": null,
+      "sample": {
+        "version": 1,
+        "vehicle": "car-b",
+        "measured_at": "2026-11-22T10:00:00Z",
+        "quality": "valid",
+        "soc": 0.32,
+        "charge_limit": 0.8,
+        "plugged_in": true,
+        "charging_state": "charging",
+        "moving": false
+      },
+      "estimate": null
+    }
+  ]
+}

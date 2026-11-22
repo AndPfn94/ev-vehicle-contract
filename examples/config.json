@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "contract_version": "1.0",
+  "socket_path": "/run/vehicle-data/telemetry.sock",
+  "sources": [
+    {
+      "id": "source-a",
+      "provider_id": "example",
+      "provider_version": "1.0.0",
+      "enabled": true,
+      "vehicles": [
+        "car-a"
+      ],
+      "poll_interval_s": 300,
+      "allow_paid_requests": false,
+      "settings": {
+        "account": "local-account",
+        "credential": "credential-a"
+      }
+    }
+  ]
+}

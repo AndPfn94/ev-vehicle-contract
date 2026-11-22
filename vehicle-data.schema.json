@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AndPfn94/ev-vehicle-contract/schemas/1.0/vehicle-data.schema.json",
+  "title": "Vehicle Data Contract 1.0",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/sample"
+    },
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/response"
+    }
+  ],
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1,
+          "type": "integer"
+        },
+        "vehicle": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "measured_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+        },
+        "quality": {
+          "enum": [
+            "valid",
+            "stale",
+            "unavailable",
+            "simulated"
+          ]
+        },
+        "soc": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "charge_limit": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "plugged_in": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "charging_state": {
+          "enum": [
+            "idle",
+            "charging",
+            "complete",
+            "error",
+            null
+          ]
+        },
+        "moving": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "range_km": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "version",
+        "vehicle",
+        "measured_at",
+        "quality"
+      ]
+    },
+    "estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "soc": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "calculated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+        },
+        "method": {
+          "enum": [
+            "source_estimate",
+            "energy_integration",
+            "manual"
+          ]
+        }
+      },
+      "required": [
+        "soc",
+        "calculated_at",
+        "method"
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "vehicle": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "received_at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "stale",
+            "offline",
+            "auth_required",
+            "rate_limited",
+            "unknown_vehicle",
+            "source_time_unknown",
+            "cost_blocked"
+          ]
+        },
+        "retry_after_s": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "sample": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/sample"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "estimate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/estimate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "vehicle",
+        "received_at",
+        "status",
+        "retry_after_s",
+        "sample",
+        "estimate"
+      ]
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.0"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "operation": {
+          "const": "snapshot"
+        },
+        "vehicles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+          }
+        }
+      },
+      "required": [
+        "contract_version",
+        "request_id",
+        "operation",
+        "vehicles"
+      ]
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.0"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+        },
+        "vehicles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "$ref": "#/$defs/entry"
+          }
+        }
+      },
+      "required": [
+        "contract_version",
+        "request_id",
+        "generated_at",
+        "vehicles"
+      ]
+    }
+  }
+}

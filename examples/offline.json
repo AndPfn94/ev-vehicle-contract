@@ -1,0 +1,15 @@
+{
+  "contract_version": "1.0",
+  "request_id": "read-1",
+  "generated_at": "2026-11-22T10:00:02Z",
+  "vehicles": [
+    {
+      "vehicle": "car-a",
+      "received_at": null,
+      "status": "offline",
+      "retry_after_s": null,
+      "sample": null,
+      "estimate": null
+    }
+  ]
+}
